@@ -49,7 +49,12 @@ class Preview extends PureComponent<Props, State> {
     const codeMirrorWrapper = codeMirror.getWrapperElement();
 
     codeMirror.on("scroll", this.onScroll);
+
+    // Hover events
     codeMirrorWrapper.addEventListener("mouseover", this.onMouseOver);
+    // codeMirrorWrapper.addEventListener("mouseout", this.onMouseOut);
+
+    // Touch events
     codeMirrorWrapper.addEventListener("mouseup", this.onMouseUp);
     codeMirrorWrapper.addEventListener("mousedown", this.onMouseDown);
   }
@@ -64,16 +69,28 @@ class Preview extends PureComponent<Props, State> {
   }
 
   onMouseOver = e => {
+    e.preventDefault();
+
     const { target } = e;
     this.props.updatePreview(target, this.props.editor);
+
+    // on mouse over attach preview screen only if line is not empty
+    if (!this.isEmptyLine(e.target.innerText)) {
+      this.props.updatePreview(target, this.props.editor);
+      return true;
+    }
   };
 
-  onMouseUp = () => {
+  onMouseUp = e => {
+    e.preventDefault();
+
     this.setState({ selecting: false });
     return true;
   };
 
-  onMouseDown = () => {
+  onMouseDown = e => {
+    e.preventDefault();
+
     this.setState({ selecting: true });
     return true;
   };
@@ -84,6 +101,10 @@ class Preview extends PureComponent<Props, State> {
 
   onClose = e => {
     this.props.clearPreview();
+  };
+
+  isEmptyLine = innerText => {
+    return innerText.length === 1 && innerText.charCodeAt(0) === 8203;
   };
 
   render() {
